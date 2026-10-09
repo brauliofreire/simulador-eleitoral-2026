@@ -55,7 +55,7 @@ function reset() {
 }
 
 function slider(id, label, value, max, attrs) {
-  return `<div class="control"><div class="control-heading"><label id="${id}-label" for="${id}">${originName(label)}</label><div class="slider-value"><input id="${id}-value" type="number" inputmode="numeric" min="0" max="${max}" step="1" value="${value}" data-slider="${id}" aria-labelledby="${id}-label" aria-describedby="sliderHelp"><span aria-hidden="true">%</span></div></div><div class="slider-track"><input id="${id}" type="range" min="0" max="${max}" step="1" value="${value}" aria-describedby="sliderHelp" ${attrs}><span class="slider-rail" aria-hidden="true"></span><span class="slider-thumb" data-slider="${id}" aria-hidden="true"></span></div></div>`;
+  return `<div class="control"><div class="control-heading"><label id="${id}-label" for="${id}">${originName(label)}</label><div class="slider-value"><input id="${id}-value" type="number" inputmode="decimal" min="0" max="${max}" step="any" value="${value}" data-slider="${id}" aria-labelledby="${id}-label" aria-describedby="sliderHelp"><span aria-hidden="true">%</span></div></div><div class="slider-track"><input id="${id}" type="range" min="0" max="${max}" step="any" value="${value}" aria-describedby="sliderHelp" ${attrs}><span class="slider-rail" aria-hidden="true"></span><span class="slider-thumb" data-slider="${id}" aria-hidden="true"></span></div></div>`;
 }
 
 function buildControls() {
@@ -89,16 +89,14 @@ function updateSlider(input, value, max = 100, min = 0) {
 function updateControls() {
   entries.forEach((e, index) => {
     const group = $(`entry-${index}`);
-    updateSlider($(`entry-${index}-l`), e.l, 98, e.l === 0 ? 0 : 2);
-    updateSlider($(`entry-${index}-f`), e.f, 98, e.f === 0 ? 0 : 2);
+    updateSlider($(`entry-${index}-l`), e.l);
+    updateSlider($(`entry-${index}-f`), e.f);
     const remaining = 100 - e.l - e.f;
     group.querySelector(".remainder").innerHTML = `${originName(e.kind === "candidate" ? "Abstenção" : "Permanecem brancos/nulos")}: ${remaining}%`;
     setMini(group, e.l, e.f, remaining);
   });
   for (const key of ["rate", "l", "f", "i"]) {
-    const candidate = key === "l" || key === "f";
-    updateSlider($(`turnout-${key}`), turnout[key], candidate ? 98 : key === "i" ? Math.max(96, turnout.i) : 100,
-      candidate && turnout[key] !== 0 ? 2 : 0);
+    updateSlider($(`turnout-${key}`), turnout[key]);
   }
   setMini($("turnoutControls"), turnout.l, turnout.f, turnout.i);
 }
@@ -167,7 +165,7 @@ function render() {
 }
 
 function applySliderValue(el, value) {
-  value = Math.max(Number(el.min), Math.min(Number(el.max), Math.round(value)));
+  value = Math.max(Number(el.min), Math.min(Number(el.max), value));
   if (el.dataset.index !== undefined) {
     const e = entries[Number(el.dataset.index)], side = el.dataset.side;
     entries[Number(el.dataset.index)] = ElectoralModel.adjustTransfer(e, side, value);
@@ -177,8 +175,8 @@ function applySliderValue(el, value) {
       turnout = ElectoralModel.adjustTransfer(turnout, key, value);
       turnout.i = 100 - turnout.l - turnout.f;
     } else if (key === "i") {
-      turnout.i = Math.min(96, value);
-      turnout.l = Math.max(2, Math.min(turnout.l, 98 - turnout.i));
+      turnout.i = value;
+      turnout.l = Math.max(0, Math.min(turnout.l, 100 - turnout.i));
       turnout.f = 100 - turnout.i - turnout.l;
     } else turnout.rate = value;
   } else return;
@@ -293,7 +291,7 @@ $("firstTurn").addEventListener("click", () => {
 for (const [id, side] of [["victoryF", "f"], ["victoryL", "l"]]) {
   $(id).addEventListener("click", () => {
     applyScenario(ElectoralModel.victoryScenario(entries, turnout, side),
-      `Novo cenário de vitória de ${candidates[side].name}. Transferências recalculadas a partir dos ajustes atuais; retorno dos ausentes em 10% e transferências para cada candidato entre 2% e 98%.`);
+      `Novo cenário de vitória de ${candidates[side].name}. Transferências recalculadas a partir dos ajustes atuais; redução de 10% dos ausentes originais e transferências de 0% a 100%.`);
   });
 }
 $("csv").addEventListener("click", () => {

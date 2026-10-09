@@ -85,6 +85,11 @@ for (const id of ids) {
   field.value = '37';
   emit('keydown', field, { key: 'Enter' });
   assert.equal(Number(range.value), 37, `${id}: Enter commits the complete number`);
+  for (const value of [0, 0.1, 1.5, 99, 99.9, 100]) {
+    field.value = String(value);
+    emit('change', field);
+    assert.equal(Number(range.value), value, `${id}: unrestricted percentage ${value}`);
+  }
   field.value = '999';
   emit('change', field);
   assert.equal(Number(range.value), Number(range.max), `${id}: values respect maximum`);
