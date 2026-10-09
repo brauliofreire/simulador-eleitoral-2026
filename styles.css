@@ -11,3 +11,5 @@
 @media(max-width:580px){.historical-results>div{align-items:flex-start;flex-direction:column;gap:9px}.historical-results dd{text-align:left}.simulation-highlight{padding:16px}}
 
 .historical-results dt{display:flex;align-items:center;gap:12px;min-width:0}.candidate-avatar{display:block;width:48px;height:56px;flex-shrink:0;object-fit:cover;object-position:center 23%;border-radius:8px;background:#243146}.historical-results dt span{overflow-wrap:anywhere}
+
+.candidate-identity{display:flex;align-items:center;gap:12px;min-width:0}.candidate-identity>span{overflow-wrap:anywhere}.breakdown-row>div:first-child{min-width:0}.breakdown-row .candidate-avatar{width:36px;height:42px}.breakdown-row .candidate-identity{gap:10px}

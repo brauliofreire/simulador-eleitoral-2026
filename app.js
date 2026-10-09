@@ -7,6 +7,17 @@ const candidates = {
   l: { name: "Lula", photo: "assets/lula.jpg" },
   f: { name: "Flávio Bolsonaro", photo: "assets/flavio.jpg" }
 };
+const originPhotos = {
+  "Augusto Cury": "assets/augusto-cury.jpg",
+  "Ronaldo Caiado": "assets/ronaldo-caiado.jpg",
+  "Renan Santos": "assets/renan-santos.jpg",
+  "Romeu Zema": "assets/romeu-zema.jpg"
+};
+
+function originName(name) {
+  const photo = originPhotos[name];
+  return photo ? `<span class="candidate-identity"><img class="candidate-avatar" src="${photo}" alt="" width="48" height="56" loading="lazy" decoding="async"><span>${name}</span></span>` : name;
+}
 let entries, turnout, result;
 
 function reset() {
@@ -25,7 +36,7 @@ function buildControls() {
   for (const [kind, id] of [["candidate", "candidateControls"], ["invalid", "invalidControls"]]) {
     $(id).innerHTML = entries.map((e, index) => e.kind !== kind ? "" :
       `<div class="candidate" id="entry-${index}" role="group" aria-label="Transferência de ${e.name}">
-        <div class="candidate-head"><strong>${e.name}</strong><small>${fmt(e.votes)} votos</small></div>
+        <div class="candidate-head"><strong>${originName(e.name)}</strong><small>${fmt(e.votes)} votos</small></div>
         <div class="sliders">${slider(`entry-${index}-l`, "Lula", e.l, 100 - e.f, `data-index="${index}" data-side="l"`)}${slider(`entry-${index}-f`, "Flávio", e.f, 100 - e.l, `data-index="${index}" data-side="f"`)}</div>
         <div class="remainder"></div><div class="mini" aria-hidden="true"><i class="l"></i><i class="f"></i><i class="r"></i></div>
       </div>`).join("");
@@ -80,7 +91,7 @@ function renderBreakdown(side) {
     { name: "Retorno de ausentes", votes: result.rows.at(-1)[side], pct: turnout[side],
       note: `${turnout.rate}% retornam · ${fmt(result.returned)} eleitores` }];
   $(`${side}Breakdown`).innerHTML = items.map(item =>
-    `<div class="breakdown-row"><div><span>${item.name}</span><small>${item.note}</small></div><div class="breakdown-value"><strong>${item.pct}%</strong><small>${fmt(item.votes)} votos</small></div></div>`).join("") +
+    `<div class="breakdown-row"><div><span>${originName(item.name)}</span><small>${item.note}</small></div><div class="breakdown-value"><strong>${item.pct}%</strong><small>${fmt(item.votes)} votos</small></div></div>`).join("") +
     `<div class="breakdown-row breakdown-total"><span>Total no cenário</span><span>${fmt(result[side])} votos</span></div>`;
 }
 
