@@ -13,23 +13,49 @@ const originPhotos = {
   "Renan Santos": "assets/renan-santos.jpg",
   "Romeu Zema": "assets/romeu-zema.jpg"
 };
+const originMemes = {
+  "Votos nulos": { photo: "assets/meme-nulos.png", kind: "nulos" },
+  "Votos brancos": { photo: "assets/meme-brancos.png", kind: "brancos" },
+  "Retorno de ausentes": { photo: "assets/meme-ausentes.png", kind: "ausentes" }
+};
 
-function originName(name) {
-  const photo = originPhotos[name];
-  return photo ? `<span class="candidate-identity"><img class="candidate-avatar" src="${photo}" alt="" width="48" height="56" loading="lazy" decoding="async"><span>${name}</span></span>` : name;
+const voteIcons = Object.fromEntries(Object.values(originMemes).map(icon => [icon.kind, icon]));
+const voteLabels = {
+  "Abstenção": ["ausentes"], "Abstenções": ["ausentes"],
+  "Ausentes que retornam": ["ausentes"], "Retorno de ausentes": ["ausentes"],
+  "Brancos/nulos": ["brancos", "nulos"], "Brancos ou nulos": ["brancos", "nulos"],
+  "Permanecem brancos/nulos": ["brancos", "nulos"]
+};
+function voteIcon(kind) {
+  return `<span class="meme-avatar meme-${kind}" aria-hidden="true"><img src="${voteIcons[kind].photo}" alt="" width="48" height="48" loading="lazy" decoding="async"></span>`;
+}
+function voteLabel(label, kinds) {
+  return `<span class="vote-label"><span class="vote-icons" aria-hidden="true">${kinds.map(voteIcon).join("")}</span><span>${label}</span></span>`;
+}
+
+function originName(name, ownSide) {
+  const meme = originMemes[name];
+  if (meme) return voteLabel(name, [meme.kind]);
+  if (voteLabels[name]) return voteLabel(name, voteLabels[name]);
+  const photo = ownSide ? candidates[ownSide].photo : originPhotos[name];
+  const icon = photo ? `<img class="candidate-avatar" src="${photo}" alt="" width="48" height="56" loading="lazy" decoding="async">` : "";
+  return icon ? `<span class="candidate-identity">${icon}<span>${name}</span></span>` : name;
 }
 let entries, turnout, result;
 
 function reset() {
   entries = ElectoralModel.initialEntries();
   turnout = { rate: 0, l: 50, f: 50, i: 0 };
+  document.querySelectorAll("[data-vote-icons]").forEach(el => {
+    if (!el.querySelector(".vote-label")) el.innerHTML = voteLabel(el.textContent, el.dataset.voteIcons.split(" "));
+  });
   buildControls();
   calculate();
   $("status").textContent = "";
 }
 
 function slider(id, label, value, max, attrs) {
-  return `<div class="control"><div class="control-heading"><label id="${id}-label" for="${id}">${label}</label><div class="slider-value"><input id="${id}-value" type="number" inputmode="numeric" min="0" max="${max}" step="1" value="${value}" data-slider="${id}" aria-labelledby="${id}-label" aria-describedby="sliderHelp"><span aria-hidden="true">%</span></div></div><div class="slider-track"><input id="${id}" type="range" min="0" max="${max}" step="1" value="${value}" aria-describedby="sliderHelp" ${attrs}><span class="slider-rail" aria-hidden="true"></span><span class="slider-thumb" data-slider="${id}" aria-hidden="true"></span></div></div>`;
+  return `<div class="control"><div class="control-heading"><label id="${id}-label" for="${id}">${originName(label)}</label><div class="slider-value"><input id="${id}-value" type="number" inputmode="numeric" min="0" max="${max}" step="1" value="${value}" data-slider="${id}" aria-labelledby="${id}-label" aria-describedby="sliderHelp"><span aria-hidden="true">%</span></div></div><div class="slider-track"><input id="${id}" type="range" min="0" max="${max}" step="1" value="${value}" aria-describedby="sliderHelp" ${attrs}><span class="slider-rail" aria-hidden="true"></span><span class="slider-thumb" data-slider="${id}" aria-hidden="true"></span></div></div>`;
 }
 
 function buildControls() {
@@ -66,7 +92,7 @@ function updateControls() {
     updateSlider($(`entry-${index}-l`), e.l, 98, e.l === 0 ? 0 : 2);
     updateSlider($(`entry-${index}-f`), e.f, 98, e.f === 0 ? 0 : 2);
     const remaining = 100 - e.l - e.f;
-    group.querySelector(".remainder").textContent = `${e.kind === "candidate" ? "Abstenção" : "Permanecem brancos/nulos"}: ${remaining}%`;
+    group.querySelector(".remainder").innerHTML = `${originName(e.kind === "candidate" ? "Abstenção" : "Permanecem brancos/nulos")}: ${remaining}%`;
     setMini(group, e.l, e.f, remaining);
   });
   for (const key of ["rate", "l", "f", "i"]) {
@@ -90,12 +116,12 @@ function calculate() {
 
 function renderBreakdown(side) {
   const own = ElectoralModel.first[side];
-  const items = [{ name: "Votos próprios", votes: own, pct: 100, note: "Mantidos da base inicial" },
+  const items = [{ name: "Votos próprios", ownSide: side, votes: own, pct: 100, note: "Mantidos da base inicial" },
     ...entries.map((e, i) => ({ name: e.name, votes: result.rows[i + 2][side], pct: e[side], note: "Da base desta origem" })),
     { name: "Retorno de ausentes", votes: result.rows.at(-1)[side], pct: turnout[side],
       note: `${turnout.rate}% retornam · ${fmt(result.returned)} eleitores` }];
   $(`${side}Breakdown`).innerHTML = items.map(item =>
-    `<div class="breakdown-row"><div><span>${originName(item.name)}</span><small>${item.note}</small></div><div class="breakdown-value"><strong>${item.pct}%</strong><small>${fmt(item.votes)} votos</small></div></div>`).join("") +
+    `<div class="breakdown-row"><div><span>${originName(item.name, item.ownSide)}</span><small>${item.note}</small></div><div class="breakdown-value"><strong>${item.pct}%</strong><small>${fmt(item.votes)} votos</small></div></div>`).join("") +
     `<div class="breakdown-row breakdown-total"><span>Total no cenário</span><span>${fmt(result[side])} votos</span></div>`;
 }
 
@@ -133,11 +159,11 @@ function render() {
   renderWinner(lp, fp);
   renderBreakdown("l");
   renderBreakdown("f");
-  $("rows").innerHTML = rows.map(r => `<tr><th scope="row">${r.name}<small>Base: ${fmt(r.base)} votos</small></th>${cell(r.l, r.lp)}${cell(r.f, r.fp)}${cell(r.rest, r.rp, r.destination)}</tr>`).join("");
-  $("totals").innerHTML = `<tr><th scope="row">Total do cenário</th>${cell(l, lp, "dos válidos")}${cell(f, fp, "dos válidos")}<td>${fmt(abs + invalid)}<small>${fmt(abs)} abstenções</small><small>${fmt(invalid)} brancos/nulos</small></td></tr>`;
+  $("rows").innerHTML = rows.map(r => `<tr><th scope="row">${originName(r.name, r.name === "Votos próprios de Lula" ? "l" : r.name === "Votos próprios de Flávio" ? "f" : undefined)}<small>Base: ${fmt(r.base)} votos</small></th>${cell(r.l, r.lp)}${cell(r.f, r.fp)}${cell(r.rest, r.rp, r.destination ? originName(r.destination) : "")}</tr>`).join("");
+  $("totals").innerHTML = `<tr><th scope="row">Total do cenário</th>${cell(l, lp, "dos válidos")}${cell(f, fp, "dos válidos")}<td>${fmt(abs + invalid)}<small>${voteLabel(`${fmt(abs)} abstenções`, ["ausentes"])}</small><small>${voteLabel(`${fmt(invalid)} brancos/nulos`, ["brancos", "nulos"])}</small></td></tr>`;
   const returnText = `Retorno: ${turnout.rate}% de ${fmt(ElectoralModel.first.abs)} ausentes = ${fmt(returned)} eleitores. Distribuição entre quem retorna: ${turnout.l}% Lula, ${turnout.f}% Flávio e ${turnout.i}% brancos/nulos.`;
-  $("returnDetails").textContent = returnText;
-  $("turnoutSummary").textContent = `${fmt(returned)} eleitores retornam neste cenário.`;
+  $("returnDetails").innerHTML = voteLabel(returnText, ["ausentes", "brancos", "nulos"]);
+  $("turnoutSummary").innerHTML = voteLabel(`${fmt(returned)} eleitores retornam neste cenário.`, ["ausentes"]);
 }
 
 function applySliderValue(el, value) {
