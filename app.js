@@ -29,7 +29,7 @@ function reset() {
 }
 
 function slider(id, label, value, max, attrs) {
-  return `<div class="control"><label for="${id}"><span>${label}</span><strong>${value}%</strong></label><input id="${id}" type="range" min="0" max="${max}" step="1" value="${value}" ${attrs}></div>`;
+  return `<div class="control"><div class="control-heading"><label id="${id}-label" for="${id}">${label}</label><div class="slider-value"><input id="${id}-value" type="number" inputmode="numeric" min="0" max="${max}" step="1" value="${value}" data-slider="${id}" aria-labelledby="${id}-label" aria-describedby="sliderHelp"><span aria-hidden="true">%</span></div></div><div class="slider-track"><input id="${id}" type="range" min="0" max="${max}" step="1" value="${value}" aria-describedby="sliderHelp" ${attrs}><span class="slider-rail" aria-hidden="true"></span><span class="slider-thumb" data-slider="${id}" aria-hidden="true"></span></div></div>`;
 }
 
 function buildControls() {
@@ -52,7 +52,11 @@ function updateSlider(input, value, max = 100, min = 0) {
   input.min = min;
   input.max = max;
   input.value = value;
-  input.previousElementSibling.querySelector("strong").textContent = `${value}%`;
+  const field = $(`${input.id}-value`);
+  field.min = min;
+  field.max = max;
+  if (document.activeElement !== field) field.value = value;
+  input.parentElement.style.setProperty("--position", `${max === min ? 0 : (value - min) / (max - min) * 100}%`);
   input.setAttribute("aria-valuetext", `${value}%`);
 }
 
@@ -136,13 +140,13 @@ function render() {
   $("turnoutSummary").textContent = `${fmt(returned)} eleitores retornam neste cenário.`;
 }
 
-document.addEventListener("input", ev => {
-  const el = ev.target;
+function applySliderValue(el, value) {
+  value = Math.max(Number(el.min), Math.min(Number(el.max), Math.round(value)));
   if (el.dataset.index !== undefined) {
     const e = entries[Number(el.dataset.index)], side = el.dataset.side;
-    entries[Number(el.dataset.index)] = ElectoralModel.adjustTransfer(e, side, Number(el.value));
+    entries[Number(el.dataset.index)] = ElectoralModel.adjustTransfer(e, side, value);
   } else if (el.dataset.turnout) {
-    const key = el.dataset.turnout, value = Number(el.value);
+    const key = el.dataset.turnout;
     if (key === "l" || key === "f") {
       turnout = ElectoralModel.adjustTransfer(turnout, key, value);
       turnout.i = 100 - turnout.l - turnout.f;
@@ -156,7 +160,70 @@ document.addEventListener("input", ev => {
   updateControls();
   calculate();
   $("scenarioStatus").hidden = true;
+}
+
+document.addEventListener("input", ev => {
+  if (ev.target.matches('input[type="range"]')) applySliderValue(ev.target, Number(ev.target.value));
 });
+
+document.addEventListener("change", ev => {
+  const field = ev.target;
+  if (!field.matches('.slider-value input')) return;
+  const input = $(field.dataset.slider);
+  if (field.value.trim() !== "" && Number.isFinite(field.valueAsNumber)) {
+    applySliderValue(input, field.valueAsNumber);
+  }
+  field.value = input.value;
+});
+
+document.addEventListener("keydown", ev => {
+  const field = ev.target;
+  if (!field.matches('.slider-value input')) return;
+  if (ev.key === "Enter") field.blur();
+  if (ev.key === "Escape") {
+    field.value = $(field.dataset.slider).value;
+    field.blur();
+  }
+});
+
+document.addEventListener("focusin", ev => {
+  if (ev.target.matches('.slider-value input')) ev.target.select();
+});
+
+// Only the thumb starts a drag. The rest of the track remains available for scrolling.
+let sliderDrag;
+document.addEventListener("pointerdown", ev => {
+  const thumb = ev.target.closest(".slider-thumb");
+  if (!thumb || !ev.isPrimary || ev.button !== 0 || sliderDrag) return;
+  const input = $(thumb.dataset.slider);
+  input.focus({ preventScroll: true });
+  const rail = input.parentElement.querySelector(".slider-rail").getBoundingClientRect();
+  sliderDrag = { thumb, input, pointerId: ev.pointerId, x: ev.clientX, y: ev.clientY,
+    value: Number(input.value), min: Number(input.min), max: Number(input.max), width: rail.width, moved: false };
+  thumb.setPointerCapture(ev.pointerId);
+});
+
+document.addEventListener("pointermove", ev => {
+  const drag = sliderDrag;
+  if (!drag || ev.pointerId !== drag.pointerId || !drag.width) return;
+  const dx = ev.clientX - drag.x, dy = ev.clientY - drag.y;
+  if (!drag.moved) {
+    if (Math.abs(dx) < 4 || Math.abs(dx) <= Math.abs(dy)) return;
+    drag.moved = true;
+  }
+  const value = Math.max(drag.min, Math.min(drag.max, Math.round(drag.value + dx / drag.width * (drag.max - drag.min))));
+  if (value !== Number(drag.input.value)) applySliderValue(drag.input, value);
+});
+
+function finishSliderDrag(ev) {
+  if (!sliderDrag || ev.pointerId !== sliderDrag.pointerId) return;
+  const { thumb, pointerId } = sliderDrag;
+  sliderDrag = undefined;
+  if (thumb.hasPointerCapture(pointerId)) thumb.releasePointerCapture(pointerId);
+}
+for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) {
+  document.addEventListener(type, finishSliderDrag);
+}
 
 const tabs = [...document.querySelectorAll('[role="tab"]')];
 function activateTab(btn, focus = false) {
@@ -167,6 +234,7 @@ function activateTab(btn, focus = false) {
     b.tabIndex = active ? 0 : -1;
   });
   document.querySelectorAll(".tabcontent").forEach(s => { s.hidden = s.id !== btn.dataset.tab; });
+  $("sliderHelp").hidden = !["transfers", "turnout"].includes(btn.dataset.tab);
   if (focus) btn.focus();
 }
 tabs.forEach((btn, index) => {
