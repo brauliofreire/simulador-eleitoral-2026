@@ -1,11 +1,85 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101827"><title>Simulador Eleitoral 2026</title><link rel="stylesheet" href="styles.css"></head>
-<body><main class="wrap"><header><div><p class="eyebrow">LABORATÓRIO DE CENÁRIOS</p><h1>Simulador Eleitoral 2026</h1><p>Explore hipóteses de transferência de votos e compare cenários em tempo real.</p></div><button id="reset" class="secondary">Restaurar cenário</button></header>
-<div class="notice"><strong>Simulação hipotética.</strong> Não é pesquisa eleitoral nem previsão. Os números de entrada foram usados na conversa original e ainda precisam de verificação em fonte oficial antes da divulgação pública.</div>
-<nav><button class="active" data-tab="overview">Visão geral</button><button data-tab="transfers">Transferências</button><button data-tab="turnout">Abstenções</button><button data-tab="details">Detalhamento</button></nav>
-<section class="card result"><h2>Resultado simulado</h2><div class="twocol"><div><span>Lula</span><strong id="lTotal">—</strong><b id="lPct">—</b></div><div><span>Flávio Bolsonaro</span><strong id="fTotal">—</strong><b id="fPct">—</b></div></div><div class="stack"><i id="lBar"></i><i id="fBar"></i></div><div class="legend"><span><i class="dot lula"></i>Lula</span><span><i class="dot flavio"></i>Flávio</span></div><div class="difference"><span>Diferença de votos</span><strong id="gap">—</strong><small id="leader"></small></div></section>
-<section id="overview" class="tabcontent"><div class="metrics"><div class="card"><small>Votos válidos</small><strong id="valid">—</strong></div><div class="card"><small>Abstenções</small><strong id="abs">—</strong></div><div class="card"><small>Brancos e nulos</small><strong id="invalid">—</strong></div><div class="card"><small>Diferença percentual</small><strong id="pp">—</strong></div></div><div class="card"><h2>Comparação com 2022</h2><div id="comparison"></div><p class="footnote">2022: Lula e Jair Bolsonaro. 2026: resultados hipotéticos para Lula e Flávio Bolsonaro. Os valores de 2022 são apresentados como referência histórica.</p></div></section>
-<section id="transfers" class="tabcontent" hidden><div class="card"><h2>Transferência entre candidatos</h2><p>Altere os percentuais. A parcela não distribuída será contabilizada como abstenção.</p><div id="candidateControls"></div></div><div class="card"><h2>Brancos e nulos</h2><p>O restante permanece como voto branco/nulo, não como abstenção.</p><div id="invalidControls"></div></div></section>
-<section id="turnout" class="tabcontent" hidden><div class="card"><h2>Participação de quem se absteve</h2><p>Base: 33.469.244 ausentes no primeiro turno. Ajuste a taxa de retorno e como os votos dos que retornam seriam distribuídos.</p><div id="turnoutControls"></div><p class="footnote">O retorno incide somente sobre os ausentes originais, evitando contar novamente as abstenções geradas pelas transferências.</p></div></section>
-<section id="details" class="tabcontent" hidden><div class="card"><h2>Memória de cálculo</h2><div class="scroll"><table><thead><tr><th>Origem</th><th>Lula</th><th>Flávio</th><th>Restante</th></tr></thead><tbody id="rows"></tbody></table></div><div class="actions"><button id="csv">Exportar CSV</button><button id="copy" class="secondary">Copiar resumo</button></div><p id="status" class="footnote" aria-live="polite"></p></div></section>
-<footer>Projeto experimental · Sem coleta de dados pessoais · Percentuais ajustáveis não representam intenção de voto.</footer></main><script src="app.js" defer></script></body></html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <title>Simulador Eleitoral 2026</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="model.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <div><p class="eyebrow">LABORATÓRIO DE CENÁRIOS</p><h1>Simulador Eleitoral 2026</h1><p>Explore hipóteses de transferência de votos e compare cenários em tempo real.</p></div>
+    <button id="reset" class="secondary">Restaurar cenário</button>
+  </header>
+  <div class="notice"><strong>Simulação hipotética.</strong> Não é pesquisa eleitoral nem previsão. As entradas de 2026 ainda precisam de verificação oficial. Consulte a aba Fontes dos dados.</div>
+
+  <section class="card result" aria-labelledby="resultTitle">
+    <div class="section-heading"><h2 id="resultTitle">Resultado simulado · 2º turno</h2><span class="badge">Cenário hipotético</span></div>
+    <div class="twocol scores">
+      <div class="score score-l"><span>Lula</span><strong id="lPct">—</strong><span id="lTotal">—</span></div>
+      <div class="score score-f"><span>Flávio Bolsonaro</span><strong id="fPct">—</strong><span id="fTotal">—</span></div>
+    </div>
+    <div id="resultChart" class="stack" role="img" aria-label="Distribuição simulada dos votos válidos"><i id="lBar"></i><i id="fBar"></i></div>
+    <p class="footnote chart-note">Percentuais sobre os votos válidos do cenário.</p>
+    <div class="result-bottom">
+      <div id="winner" class="winner" aria-live="polite" aria-atomic="true">
+        <img id="winnerPhoto" src="assets/flavio.jpg" alt="Flávio Bolsonaro" width="72" height="88">
+        <div><span id="winnerLabel" class="winner-label">Presidente eleito no cenário simulado</span><strong id="winnerName">—</strong><small id="winnerShare">—</small></div>
+      </div>
+      <div class="difference"><span>Diferença de votos</span><strong id="gap">—</strong><small id="leader">—</small></div>
+    </div>
+  </section>
+
+  <nav class="tabs" role="tablist" aria-label="Explorar o cenário">
+    <button id="tab-overview" class="active" role="tab" aria-selected="true" aria-controls="overview" data-tab="overview">Visão geral</button>
+    <button id="tab-transfers" role="tab" aria-selected="false" aria-controls="transfers" tabindex="-1" data-tab="transfers">Transferências</button>
+    <button id="tab-turnout" role="tab" aria-selected="false" aria-controls="turnout" tabindex="-1" data-tab="turnout">Abstenções, nulos e brancos</button>
+    <button id="tab-comparisonTab" role="tab" aria-selected="false" aria-controls="comparisonTab" tabindex="-1" data-tab="comparisonTab">Comparação com 2022</button>
+    <button id="tab-details" role="tab" aria-selected="false" aria-controls="details" tabindex="-1" data-tab="details">Detalhamento</button>
+    <button id="tab-sources" role="tab" aria-selected="false" aria-controls="sources" tabindex="-1" data-tab="sources">Fontes dos dados</button>
+  </nav>
+
+  <section id="overview" class="tabcontent" role="tabpanel" aria-labelledby="tab-overview" tabindex="0">
+    <div class="twocol breakdowns">
+      <article class="card breakdown breakdown-l"><h2>Composição dos votos de Lula</h2><p class="footnote">Percentual recebido de cada origem e votos adicionados.</p><div id="lBreakdown"></div></article>
+      <article class="card breakdown breakdown-f"><h2>Composição dos votos de Flávio</h2><p class="footnote">Percentual recebido de cada origem e votos adicionados.</p><div id="fBreakdown"></div></article>
+    </div>
+    <div class="metrics">
+      <div class="card"><small>Votos válidos</small><strong id="valid">—</strong></div>
+      <div class="card"><small>Abstenções</small><strong id="abs">—</strong></div>
+      <div class="card"><small>Brancos e nulos</small><strong id="invalid">—</strong></div>
+      <div class="card"><small>Diferença percentual</small><strong id="pp">—</strong></div>
+    </div>
+  </section>
+  <section id="transfers" class="tabcontent" role="tabpanel" aria-labelledby="tab-transfers" tabindex="0" hidden>
+    <div class="card"><h2>Transferências de outros candidatos</h2><p>Distribua os votos entre Lula e Flávio. A parcela restante será contabilizada como abstenção.</p><div id="candidateControls"></div></div>
+  </section>
+  <section id="turnout" class="tabcontent" role="tabpanel" aria-labelledby="tab-turnout" tabindex="0" hidden>
+    <div class="card"><h2>Retorno de quem se absteve</h2><p>Base: 33.469.244 ausentes na entrada do primeiro turno. Ajuste quantos retornam e como os votos desses eleitores se distribuem.</p><div id="turnoutControls"></div><p class="footnote">O retorno incide somente sobre os ausentes originais, sem incluir abstenções geradas pelas transferências.</p></div>
+    <div class="card"><h2>Votos nulos e brancos</h2><p>A parcela transferida vai para o candidato escolhido. O restante permanece como voto inválido.</p><div id="invalidControls"></div></div>
+  </section>
+  <section id="comparisonTab" class="tabcontent" role="tabpanel" aria-labelledby="tab-comparisonTab" tabindex="0" hidden>
+    <div class="card"><h2>Comparação com a eleição de 2022</h2><div id="comparison"></div><p class="footnote">2022: resultado oficial do segundo turno entre Lula e Jair Bolsonaro. 2026: cenário hipotético entre Lula e Flávio Bolsonaro. A comparação usa números absolutos, sem ajuste pelo tamanho do eleitorado.</p></div>
+  </section>
+  <section id="details" class="tabcontent" role="tabpanel" aria-labelledby="tab-details" tabindex="0" hidden>
+    <div class="card"><h2>Memória de cálculo</h2><p class="footnote">Cada célula mostra votos e percentual sobre a base da linha. No retorno de ausentes, a base é apenas quem retorna; nos totais dos candidatos, o percentual é sobre os votos válidos.</p><p id="returnDetails" class="footnote"></p>
+      <div class="scroll" role="region" aria-label="Tabela de memória de cálculo; deslize para ver todas as colunas" tabindex="0"><table><caption class="sr-only">Distribuição por origem: base, votos e percentuais</caption><thead><tr><th scope="col">Origem / base</th><th scope="col">Lula</th><th scope="col">Flávio</th><th scope="col">Restante / destino</th></tr></thead><tbody id="rows"></tbody><tfoot id="totals"></tfoot></table></div>
+      <div class="actions"><button id="csv">Exportar CSV</button><button id="copy" class="secondary">Copiar resumo</button></div><p id="status" class="footnote" aria-live="polite"></p>
+    </div>
+  </section>
+  <section id="sources" class="tabcontent" role="tabpanel" aria-labelledby="tab-sources" tabindex="0" hidden>
+    <div class="card"><h2>Fontes dos dados</h2><p>Referências oficiais e origem das premissas deste painel.</p>
+      <article class="source"><span class="badge">Referência verificada · 2022</span><h3>Resultado do segundo turno de 2022</h3><p>Lula: 60.345.999 votos (50,90%). Jair Bolsonaro: 58.206.354 votos (49,10%). Esses são os valores usados na comparação histórica.</p><a href="https://www.tse.jus.br/comunicacao/noticias/2022/Outubro/100-das-secoes-totalizadas-confira-como-ficou-o-quadro-eleitoral-apos-o-2o-turno/" target="_blank" rel="noopener noreferrer">Totalização do segundo turno de 2022 — TSE ↗</a></article>
+      <article class="source"><span class="badge pending">Entradas de 2026 · verificação pendente</span><h3>Votos de origem, ausentes, nulos e brancos</h3><p>Os números iniciais foram fornecidos na concepção do projeto. Nenhum link de origem foi registrado para esses valores; ainda não são apresentados como dados oficiais do TSE. Os links abaixo são referências para conferência, sem atualização automática do painel.</p><div class="source-links"><a href="https://resultados.tse.jus.br/oficial/app/index.html" target="_blank" rel="noopener noreferrer">Portal de resultados — TSE ↗</a><a href="https://www.tse.jus.br/eleicoes/eleicoes-2026-content/divulgacao-dos-resultados-das-eleicoes-2026" target="_blank" rel="noopener noreferrer">Divulgação dos resultados das Eleições 2026 — TSE ↗</a></div></article>
+      <article class="source"><h3>Percentuais de transferência e retorno</h3><p>São hipóteses ajustáveis pelo usuário, não dados do TSE nem estimativas de intenção de voto. Os votos próprios são mantidos integralmente. Sobras de outros candidatos viram abstenção; sobras de nulos e brancos permanecem inválidas.</p></article>
+      <article class="source"><h3>Fotos e créditos</h3><p>Fotos armazenadas no próprio aplicativo. Exibição recortada para enquadramento.</p><div class="source-links"><a href="https://commons.wikimedia.org/wiki/File:Foto_oficial_de_Luiz_In%C3%A1cio_Lula_da_Silva_(2023%E2%80%932027).jpg" target="_blank" rel="noopener noreferrer">Lula — Ricardo Stuckert/PR, via Wikimedia Commons ↗</a><a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener noreferrer">Licença da foto de Lula: CC BY 2.0 ↗</a><a href="https://www25.senado.leg.br/pt_BR/web/senadores/senador/-/perfil/5894" target="_blank" rel="noopener noreferrer">Flávio Bolsonaro — foto do perfil oficial do Senado Federal ↗</a></div></article>
+    </div>
+  </section>
+  <footer>Projeto experimental · Sem coleta de dados pessoais · Cenários não representam intenção de voto.</footer>
+</main>
+</body>
+</html>

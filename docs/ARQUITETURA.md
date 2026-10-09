@@ -28,7 +28,11 @@ flowchart TD
 simulador-eleitoral-2026/
 ├── index.html      # Interface, abas, cartões, tabelas e pontos de montagem
 ├── styles.css      # Tema escuro, componentes visuais e regras responsivas
-├── app.js          # Dados, estado, eventos, cálculo e exportação
+├── app.js          # Estado, controles, renderização e exportação
+├── model.js        # Dados iniciais e cálculo independente da interface
+├── assets/         # Fotos locais dos candidatos
+├── tests/          # Verificações do cálculo
+├── docs/           # Arquitetura e roadmap
 ├── README.md       # Apresentação e instruções básicas
 └── .nojekyll       # Compatibilidade com futura publicação estática
 ```
@@ -39,13 +43,16 @@ simulador-eleitoral-2026/
 |---|---|
 | `index.html` | Estrutura semântica, áreas de resultado, navegação por abas e carregamento do CSS/JS |
 | `styles.css` | Estilos, cores, grades, barras e adaptações para telas menores |
-| `app.js` | Valores iniciais, percentuais, cálculo, renderização, eventos, CSV e cópia |
+| `app.js` | Estado da interface, controles, renderização, eventos, CSV e cópia |
+| `model.js` | Dados iniciais, distribuição dos votos e cálculo independente da interface |
+| `assets/` | Fotos locais de Lula e Flávio, com créditos na aba Fontes |
+| `tests/model.test.cjs` | Conservação dos votos, arredondamento e cenários extremos |
 | `README.md` | Instruções gerais e advertências sobre os dados |
 | `.nojekyll` | Evita processamento Jekyll em uma eventual hospedagem no GitHub Pages |
 
 ## 3. Organização lógica do JavaScript
 
-A implementação atual concentra as funcionalidades em `app.js`, com as seguintes unidades lógicas:
+A implementação divide o modelo de cálculo (`model.js`) e a interface (`app.js`), com as seguintes unidades lógicas:
 
 1. **Dados iniciais:** `defaults` contém grupos de votos transferíveis e percentuais iniciais; `first` contém os votos dos dois candidatos e a abstenção original.
 2. **Estado em memória:** `entries` guarda as distribuições por grupo; `turnout` guarda a taxa de retorno dos ausentes e a distribuição desses votos; `result` guarda o último resultado calculado.
@@ -75,9 +82,11 @@ sequenceDiagram
 
 Para cada grupo transferível com `V` votos:
 
-- `L = arredondar(V × percentual_Lula / 100)`
-- `F = arredondar(V × percentual_Flavio / 100)`
-- `R = V − L − F`
+- Calcular as quotas exatas de Lula, Flávio e restante.
+- Distribuir inicialmente a parte inteira de cada quota.
+- Distribuir os votos que faltam pelas maiores partes fracionárias.
+- Em empate de frações, usar a ordem Lula, Flávio e restante.
+- Garantir `L + F + R = V` e valores inteiros não negativos.
 
 Os percentuais de Lula e Flávio não podem ultrapassar **100% somados**.
 
@@ -103,20 +112,22 @@ O módulo de comparecimento usa a abstenção **original** como base para o reto
 
 ### Limitações metodológicas
 
-O modelo é **determinístico**, não probabilístico. Ele não calcula intervalos de confiança, margem de erro, correlações, probabilidades de vitória ou comportamento individual dos eleitores. A palavra “estatístico” integra o nome do produto, mas não deve ser interpretada como validação estatística das hipóteses.
+O modelo é **determinístico**, não probabilístico. Ele não calcula intervalos de confiança, margem de erro, correlações, probabilidades de vitória ou comportamento individual dos eleitores. As hipóteses configuradas não possuem validação estatística automática.
 
 Os valores de entrada precisam ser conferidos contra dados oficiais antes de qualquer publicação. A comparação de 2022 é apenas referência histórica; não constitui projeção automática de tendência.
 
 ## 5. Interface e responsividade
 
-A interface é organizada em quatro abas:
+O resultado simulado do segundo turno permanece acima das abas, com foto do eleito no cenário (ou indicação de empate). A interface é organizada em seis abas:
 
 | Aba | Função |
 |---|---|
-| Visão geral | Totais, percentuais, diferença, indicadores e comparação com 2022 |
-| Transferências | Percentuais por candidato de origem e para votos brancos/nulos |
-| Abstenções | Retorno de eleitores originalmente ausentes e sua distribuição |
-| Detalhamento | Tabela de composição, exportação CSV e cópia do resumo |
+| Visão geral | Composição por candidato, percentuais recebidos por origem e indicadores |
+| Transferências | Percentuais por candidato de origem |
+| Abstenções, nulos e brancos | Retorno dos ausentes, distribuição e transferência dos votos inválidos |
+| Comparação com 2022 | Resultado histórico oficial e cenário atual |
+| Detalhamento | Votos e percentuais por origem, exportação CSV e cópia do resumo |
+| Fontes dos dados | Referências TSE, estado de verificação das entradas e créditos das fotos |
 
 O CSS usa **Grid** e **Flexbox**, com ajuste para telas pequenas. A responsividade existe na versão inicial, mas ainda deve ser validada em navegadores móveis e desktops reais.
 
@@ -132,7 +143,7 @@ O CSS usa **Grid** e **Flexbox**, com ajuste para telas pequenas. A responsivida
 
 ## 7. Execução local e testes
 
-Não há etapa de compilação.
+Não há etapa de compilação. O teste de cálculo pode ser executado com `node tests/model.test.cjs`. A interface foi inspecionada no Chrome em desktop e em emulação de celular (440 × 956). Foram verificados os seis painéis, retorno integral, mudança de vencedor/foto, restauração e download do CSV. Ainda é necessário testar em dispositivos reais e outros navegadores.
 
 ### Computador
 
@@ -190,7 +201,7 @@ Também são propostas futuras:
 - Persistência de cenários em `localStorage`;
 - Links compartilháveis que codifiquem os parâmetros do cenário;
 - Melhorias de acessibilidade e testes automatizados;
-- Separação de dados, cálculo e apresentação em módulos JS;
+- Ampliação da modularização de dados, cálculo e apresentação (o cálculo já está separado em `model.js`);
 - Versionamento explícito e referências verificáveis dos dados eleitorais.
 
 ### Critérios de aceite da PWA
