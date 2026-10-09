@@ -36,3 +36,43 @@ for (const votes of [0, 1, 3, 101, 33469244]) {
   }
 }
 console.log('Cálculo validado: cenário inicial, 60 cenários extremos e 25.755 distribuições.');
+
+const baseEntries = model.initialEntries();
+const firstTurn = model.firstTurnScenario(baseEntries);
+assert.ok(firstTurn.entries.every(e => e.l === 0 && e.f === 0));
+assert.equal(firstTurn.turnout.rate, 0);
+const firstTurnResult = model.calculate(firstTurn.entries, firstTurn.turnout);
+verify(firstTurnResult);
+assert.equal(firstTurnResult.l, model.first.l);
+assert.equal(firstTurnResult.f, model.first.f);
+assert.equal(firstTurnResult.invalid, 3674249 + 2300798);
+assert.equal(firstTurnResult.returned, 0);
+
+const seeds = [
+  { entries: baseEntries, turnout: { rate: 0, l: 50, f: 50, i: 0 } },
+  firstTurn,
+  ...[0, 50, 100].flatMap(rate => [[100, 0, 0], [0, 100, 0], [0, 0, 100], [50, 50, 0]].map(([l, f, i]) => ({
+    entries: baseEntries.map(e => ({ ...e, l, f })), turnout: { rate, l, f, i }
+  })))
+];
+for (const seed of seeds) {
+  for (const side of ['l', 'f']) {
+    const before = JSON.stringify(seed);
+    const generated = model.victoryScenario(seed.entries, seed.turnout, side);
+    const result = model.calculate(generated.entries, generated.turnout);
+    verify(result);
+    assert.ok(result[side] > result[side === 'l' ? 'f' : 'l']);
+    assert.equal(generated.turnout.rate, seed.turnout.rate);
+    assert.equal(JSON.stringify(seed), before, 'Original scenario must not mutate');
+    generated.entries.forEach((e, i) => {
+      assert.ok(e[side] >= seed.entries[i][side]);
+      assert.ok(e.l + e.f <= 100);
+    });
+    const second = model.victoryScenario(generated.entries, generated.turnout, side);
+    assert.equal(JSON.stringify(second), JSON.stringify(generated), 'Already-winning scenario stays unchanged');
+  }
+}
+const lulaWin = model.victoryScenario(baseEntries, seeds[0].turnout, 'l');
+const flavioWin = model.victoryScenario(lulaWin.entries, lulaWin.turnout, 'f');
+assert.ok(model.calculate(flavioWin.entries, flavioWin.turnout).f > model.calculate(flavioWin.entries, flavioWin.turnout).l);
+console.log('Cenários rápidos validados: primeiro turno, 28 vitórias, preservação dos ajustes e alternância de vencedor.');

@@ -140,6 +140,7 @@ document.addEventListener("input", ev => {
   // Keep the same inputs mounted so dragging and keyboard focus remain uninterrupted.
   updateControls();
   calculate();
+  $("scenarioStatus").hidden = true;
 });
 
 const tabs = [...document.querySelectorAll('[role="tab"]')];
@@ -167,7 +168,28 @@ tabs.forEach((btn, index) => {
   });
 });
 
-$("reset").addEventListener("click", reset);
+function applyScenario(scenario, message) {
+  entries = scenario.entries;
+  turnout = scenario.turnout;
+  updateControls();
+  calculate();
+  $("status").textContent = "";
+  $("scenarioStatus").textContent = message;
+  $("scenarioStatus").hidden = false;
+}
+$("firstTurn").addEventListener("click", () => {
+  applyScenario(ElectoralModel.firstTurnScenario(entries),
+    "Situação 1º Turno: transferências e retorno de ausentes zerados. O gráfico mostra os votos próprios dos dois candidatos; sobras seguem as regras do simulador.");
+});
+for (const [id, side] of [["victoryF", "f"], ["victoryL", "l"]]) {
+  $(id).addEventListener("click", () => {
+    const alreadyWinning = result[side] > result[side === "l" ? "f" : "l"];
+    applyScenario(ElectoralModel.victoryScenario(entries, turnout, side),
+      alreadyWinning
+        ? `${candidates[side].name} já vence neste cenário. Os ajustes foram mantidos.`
+        : `Vitória de ${candidates[side].name} no cenário simulado. Transferências ajustadas em passos de 1 ponto percentual até assumir a liderança; a taxa de retorno dos ausentes foi mantida.`);
+  });
+}
 $("csv").addEventListener("click", () => {
   const data = [
     ["Cenário hipotético — segundo turno; não é previsão eleitoral"],

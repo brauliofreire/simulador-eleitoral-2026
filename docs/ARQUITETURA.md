@@ -59,7 +59,7 @@ A implementação divide o modelo de cálculo (`model.js`) e a interface (`app.j
 3. **Controles:** `buildControls()` e `buildTurnout()` constroem os sliders.
 4. **Cálculo:** `calculate()` aplica as hipóteses e consolida votos válidos, abstenções e inválidos.
 5. **Renderização:** `render()` atualiza totais, percentuais, barras, comparação histórica e tabela.
-6. **Eventos:** ouvintes de `input` e `click` atualizam estado, recalculam, trocam abas, restauram valores e exportam.
+6. **Eventos:** ouvintes de `input` e `click` atualizam estado, recalculam, trocam abas, aplicam cenários rápidos e exportam.
 
 ### Fluxo de interação
 
@@ -172,7 +172,8 @@ Na aba **Ports**, abra a porta 8000 no navegador. **Mantenha a porta privada** p
 - [ ] Confirmar que `Lula + Flávio ≤ 100%` em cada grupo.
 - [ ] Verificar que votos de origem são conservados em cada distribuição.
 - [ ] Testar taxa de retorno de ausentes em 0%, 50% e 100%.
-- [ ] Restaurar os parâmetros e comparar com o cenário inicial.
+- [ ] Zerar as transferências com Situação 1º Turno e conferir os votos próprios.
+- [ ] Gerar vitória de cada candidato a partir de ajustes diferentes, inclusive retorno integral.
 - [ ] Exportar CSV e conferir totais.
 - [ ] Copiar o resumo (em contexto seguro/HTTPS).
 - [ ] Testar em telas pequenas, orientação vertical e horizontal.

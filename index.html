@@ -13,8 +13,14 @@
 <main class="wrap">
   <header>
     <div><p class="eyebrow">LABORATÓRIO DE CENÁRIOS</p><h1>Simulador Eleitoral 2026</h1><p>Explore hipóteses de transferência de votos e compare cenários em tempo real.</p></div>
-    <button id="reset" class="secondary">Restaurar cenário</button>
+    <div class="scenario-actions" role="group" aria-label="Cenários rápidos">
+      <button id="firstTurn" class="secondary" aria-describedby="scenarioHelp">Situação 1º Turno</button>
+      <button id="victoryF" class="scenario-f" aria-describedby="scenarioHelp">Vitória Flávio</button>
+      <button id="victoryL" class="scenario-l" aria-describedby="scenarioHelp">Vitória Lula</button>
+      <small id="scenarioHelp">Vitórias simuladas a partir dos ajustes atuais.</small>
+    </div>
   </header>
+  <p id="scenarioStatus" class="scenario-status" role="status" aria-live="polite" hidden></p>
   <div class="notice"><strong>Simulação hipotética.</strong> Não é pesquisa eleitoral nem previsão. As entradas de 2026 ainda precisam de verificação oficial. Consulte a aba Fontes dos dados.</div>
 
   <section class="card result" aria-labelledby="resultTitle">

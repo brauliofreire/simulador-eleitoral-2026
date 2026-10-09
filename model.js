@@ -46,5 +46,47 @@ const ElectoralModel = (() => {
       lp: turnout.l, fp: turnout.f, rp: turnout.i, destination: "Brancos/nulos" });
     return { l, f, abs, invalid, rows, returned };
   }
-  return { first, initialEntries, distribute, calculate };
+  function firstTurnScenario(entries) {
+    return {
+      entries: entries.map(e => ({ ...e, l: 0, f: 0 })),
+      turnout: { rate: 0, l: 0, f: 0, i: 100 }
+    };
+  }
+
+  function victoryScenario(entries, turnout, side) {
+    if (!["l", "f"].includes(side)) throw new Error("Candidato inválido");
+    const scenario = { entries: entries.map(e => ({ ...e })), turnout: { ...turnout } };
+    const other = side === "l" ? "f" : "l";
+    const margin = state => {
+      const result = calculate(state.entries, state.turnout);
+      return result[side] - result[other];
+    };
+    // Keep an existing victory unchanged. Otherwise choose the greatest gain
+    // per whole percentage point, using unallocated votes before the opponent's.
+    while (margin(scenario) <= 0) {
+      let best, bestMargin = margin(scenario);
+      for (let index = 0; index <= scenario.entries.length; index++) {
+        const isTurnout = index === scenario.entries.length;
+        if (isTurnout && scenario.turnout.rate === 0) continue;
+        const group = isTurnout ? scenario.turnout : scenario.entries[index];
+        if (group[side] >= 100) continue;
+        const changed = { ...group, [side]: group[side] + 1 };
+        changed[other] = Math.min(changed[other], 100 - changed[side]);
+        if (isTurnout) changed.i = 100 - changed.l - changed.f;
+        const candidate = {
+          entries: scenario.entries.map((e, i) => i === index ? changed : e),
+          turnout: isTurnout ? changed : scenario.turnout
+        };
+        const candidateMargin = margin(candidate);
+        if (candidateMargin > bestMargin) {
+          best = candidate; bestMargin = candidateMargin;
+        }
+      }
+      if (!best) throw new Error("Não há votos suficientes para gerar a vitória neste modelo.");
+      scenario.entries = best.entries;
+      scenario.turnout = best.turnout;
+    }
+    return scenario;
+  }
+  return { first, initialEntries, distribute, calculate, firstTurnScenario, victoryScenario };
 })();
