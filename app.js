@@ -15,8 +15,8 @@ const originPhotos = {
 };
 const originMemes = {
   "Votos nulos": { photo: "assets/meme-nulos.png", kind: "nulos" },
-  "Votos brancos": { photo: "assets/meme-brancos.png", kind: "brancos" },
-  "Retorno de ausentes": { photo: "assets/meme-ausentes.png", kind: "ausentes" }
+  "Votos brancos": { photo: "assets/meme-brancos-homer.jpg", kind: "brancos" },
+  "Retorno de ausentes": { photo: "assets/meme-ausentes-rosa.png", kind: "ausentes" }
 };
 
 const voteIcons = Object.fromEntries(Object.values(originMemes).map(icon => [icon.kind, icon]));
