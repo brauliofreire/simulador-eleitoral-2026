@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#101827">
   <title>Simulador Eleitoral 2026</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=5">
   <script src="model.js?v=4" defer></script>
-  <script src="app.js?v=4" defer></script>
+  <script src="app.js?v=5" defer></script>
 </head>
 <body>
 <main class="wrap">
@@ -23,7 +23,7 @@
   <p id="scenarioStatus" class="scenario-status" role="status" aria-live="polite" hidden></p>
   <div class="notice"><strong>Simulação hipotética.</strong> Não é pesquisa eleitoral nem previsão. As entradas de 2026 ainda precisam de verificação oficial. Consulte a aba Fontes dos dados.</div>
 
-  <section class="card result" aria-labelledby="resultTitle">
+  <section id="simulatedResult" class="card result" aria-labelledby="resultTitle" tabindex="-1">
     <div class="section-heading"><h2 id="resultTitle">Resultado simulado · 2º turno</h2><span class="badge">Cenário hipotético</span></div>
     <div class="twocol scores">
       <div class="score score-l"><span>Lula</span><strong id="lPct">—</strong><span id="lTotal">—</span></div>
@@ -69,7 +69,29 @@
     <div class="card"><h2>Votos nulos e brancos</h2><p>A parcela transferida vai para o candidato escolhido. O restante permanece como voto inválido.</p><div id="invalidControls"></div></div>
   </section>
   <section id="comparisonTab" class="tabcontent" role="tabpanel" aria-labelledby="tab-comparisonTab" tabindex="0" hidden>
-    <div class="card"><h2>Comparação com a eleição de 2022</h2><div id="comparison"></div><p class="footnote">2022: resultado oficial do segundo turno entre Lula e Jair Bolsonaro. 2026: cenário hipotético entre Lula e Flávio Bolsonaro. A comparação usa números absolutos, sem ajuste pelo tamanho do eleitorado.</p></div>
+    <article class="card historical-card" aria-labelledby="firstTurn2022Title">
+      <div class="section-heading"><h2 id="firstTurn2022Title">2022 · 1º turno</h2><span class="badge">Resultado oficial · TSE</span></div>
+      <dl class="historical-results">
+        <div><dt>Lula</dt><dd><strong>57.259.504 votos</strong><span>48,43% dos votos válidos</span></dd></div>
+        <div><dt>Jair Bolsonaro</dt><dd><strong>51.072.345 votos</strong><span>43,20% dos votos válidos</span></dd></div>
+      </dl>
+      <p class="footnote">Dados das duas candidaturas que participaram do segundo turno. O primeiro turno teve outras candidaturas.</p>
+      <a class="historical-source" href="https://www.tse.jus.br/comunicacao/noticias/2022/Outubro/100-das-secoes-totalizadas-confira-como-ficou-o-quadro-eleitoral-apos-o-1o-turno" target="_blank" rel="noopener noreferrer">Consultar a totalização do 1º turno no TSE ↗</a>
+    </article>
+    <article class="card historical-card" aria-labelledby="secondTurn2022Title">
+      <div class="section-heading"><h2 id="secondTurn2022Title">2022 · 2º turno</h2><span class="badge">Resultado oficial · TSE</span></div>
+      <dl class="historical-results">
+        <div><dt>Lula</dt><dd><strong>60.345.999 votos</strong><span>50,90% dos votos válidos</span></dd></div>
+        <div><dt>Jair Bolsonaro</dt><dd><strong>58.206.354 votos</strong><span>49,10% dos votos válidos</span></dd></div>
+      </dl>
+      <a class="historical-source" href="https://www.tse.jus.br/comunicacao/noticias/2022/Outubro/100-das-secoes-totalizadas-confira-como-ficou-o-quadro-eleitoral-apos-o-2o-turno/" target="_blank" rel="noopener noreferrer">Consultar a totalização do 2º turno no TSE ↗</a>
+      <section class="simulation-highlight" aria-labelledby="simulationReferenceTitle">
+        <span class="badge">Cenário hipotético</span>
+        <h3 id="simulationReferenceTitle">Resultado simulado · 2º turno</h3>
+        <p>O cenário atual está no gráfico principal, acima das abas, e acompanha os ajustes de transferência.</p>
+        <a href="#simulatedResult">Ver o resultado simulado ↑</a>
+      </section>
+    </article>
   </section>
   <section id="details" class="tabcontent" role="tabpanel" aria-labelledby="tab-details" tabindex="0" hidden>
     <div class="card"><h2>Memória de cálculo</h2><p class="footnote">Cada célula mostra votos e percentual sobre a base da linha. No retorno de ausentes, a base é apenas quem retorna; nos totais dos candidatos, o percentual é sobre os votos válidos.</p><p id="returnDetails" class="footnote"></p>
@@ -79,7 +101,8 @@
   </section>
   <section id="sources" class="tabcontent" role="tabpanel" aria-labelledby="tab-sources" tabindex="0" hidden>
     <div class="card"><h2>Fontes dos dados</h2><p>Referências oficiais e origem das premissas deste painel.</p>
-      <article class="source"><span class="badge">Referência verificada · 2022</span><h3>Resultado do segundo turno de 2022</h3><p>Lula: 60.345.999 votos (50,90%). Jair Bolsonaro: 58.206.354 votos (49,10%). Esses são os valores usados na comparação histórica.</p><a href="https://www.tse.jus.br/comunicacao/noticias/2022/Outubro/100-das-secoes-totalizadas-confira-como-ficou-o-quadro-eleitoral-apos-o-2o-turno/" target="_blank" rel="noopener noreferrer">Totalização do segundo turno de 2022 — TSE ↗</a></article>
+      <article class="source"><span class="badge">Referência verificada · 2022</span><h3>Resultado do primeiro turno de 2022</h3><p>Lula: 57.259.504 votos (48,43%). Jair Bolsonaro: 51.072.345 votos (43,20%). O card exibe essas duas candidaturas; consulte a fonte para o resultado completo.</p><a href="https://www.tse.jus.br/comunicacao/noticias/2022/Outubro/100-das-secoes-totalizadas-confira-como-ficou-o-quadro-eleitoral-apos-o-1o-turno" target="_blank" rel="noopener noreferrer">Totalização do primeiro turno de 2022 — TSE ↗</a></article>
+      <article class="source"><span class="badge">Referência verificada · 2022</span><h3>Resultado do segundo turno de 2022</h3><p>Lula: 60.345.999 votos (50,90%). Jair Bolsonaro: 58.206.354 votos (49,10%). Esses são os valores do card de segundo turno de 2022.</p><a href="https://www.tse.jus.br/comunicacao/noticias/2022/Outubro/100-das-secoes-totalizadas-confira-como-ficou-o-quadro-eleitoral-apos-o-2o-turno/" target="_blank" rel="noopener noreferrer">Totalização do segundo turno de 2022 — TSE ↗</a></article>
       <article class="source"><span class="badge pending">Entradas de 2026 · verificação pendente</span><h3>Votos de origem, ausentes, nulos e brancos</h3><p>Os números iniciais foram fornecidos na concepção do projeto. Nenhum link de origem foi registrado para esses valores; ainda não são apresentados como dados oficiais do TSE. Os links abaixo são referências para conferência, sem atualização automática do painel.</p><div class="source-links"><a href="https://resultados.tse.jus.br/oficial/app/index.html" target="_blank" rel="noopener noreferrer">Portal de resultados — TSE ↗</a><a href="https://www.tse.jus.br/eleicoes/eleicoes-2026-content/divulgacao-dos-resultados-das-eleicoes-2026" target="_blank" rel="noopener noreferrer">Divulgação dos resultados das Eleições 2026 — TSE ↗</a></div></article>
       <article class="source"><h3>Percentuais de transferência e retorno</h3><p>São hipóteses ajustáveis pelo usuário, não dados do TSE nem estimativas de intenção de voto. Os votos próprios são mantidos integralmente. Sobras de outros candidatos viram abstenção; sobras de nulos e brancos permanecem inválidas.</p></article>
       <article class="source"><h3>Fotos e créditos</h3><p>Fotos armazenadas no próprio aplicativo. Exibição recortada para enquadramento.</p><div class="source-links"><a href="https://commons.wikimedia.org/wiki/File:Foto_oficial_de_Luiz_In%C3%A1cio_Lula_da_Silva_(2023%E2%80%932027).jpg" target="_blank" rel="noopener noreferrer">Lula — Ricardo Stuckert/PR, via Wikimedia Commons ↗</a><a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener noreferrer">Licença da foto de Lula: CC BY 2.0 ↗</a><a href="https://www25.senado.leg.br/pt_BR/web/senadores/senador/-/perfil/5894" target="_blank" rel="noopener noreferrer">Flávio Bolsonaro — foto do perfil oficial do Senado Federal ↗</a></div></article>

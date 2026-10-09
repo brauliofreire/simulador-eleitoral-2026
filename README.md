@@ -14,7 +14,7 @@ Sem coleta de dados pessoais. Repositório público e publicação no GitHub Pag
 Acesse: [https://brauliofreire.github.io/simulador-eleitoral-2026/](https://brauliofreire.github.io/simulador-eleitoral-2026/). A publicação usa a raiz da branch `main`, com HTTPS; novos pushes nessa branch atualizam o site. Os dados de entrada de 2026 continuam pendentes de conferência oficial.
 
 ## Interface e validação local
-O resultado simulado do **2º turno** permanece acima das seis abas. A visão geral mostra a composição de votos por candidato; abstenções, nulos e brancos compartilham uma aba. A comparação histórica e as fontes têm abas próprias. O eleito é identificado **somente no cenário simulado**, com foto local, ou como empate.
+O resultado simulado do **2º turno** permanece acima das seis abas. A visão geral mostra a composição de votos por candidato; abstenções, nulos e brancos compartilham uma aba. Os resultados históricos e as fontes têm abas próprias. A aba de 2022 apresenta cards de primeiro e segundo turno, com votos e percentuais oficiais do TSE. Uma seção dourada no segundo card leva ao gráfico do cenário atual, sem calcular diferenças entre eleições. O eleito é identificado **somente no cenário simulado**, com foto local, ou como empate.
 
 A memória de cálculo e o CSV incluem percentuais por origem. Os percentuais de retorno se aplicam aos ausentes que retornam, cuja base é exibida separadamente. Os votos inteiros são distribuídos pelo método dos maiores restos: primeiro as partes inteiras, depois os votos restantes pelas maiores frações (empates seguem a ordem Lula, Flávio, restante). Isso evita saldos negativos por arredondamento.
 

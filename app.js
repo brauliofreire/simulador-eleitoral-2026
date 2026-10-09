@@ -118,11 +118,6 @@ function render() {
   renderWinner(lp, fp);
   renderBreakdown("l");
   renderBreakdown("f");
-  const max = Math.max(l, f, 60345999, 58206354) * 1.05;
-  $("comparison").innerHTML = [
-    ["2022 · Lula", 60345999, "lula"], ["2022 · Jair Bolsonaro", 58206354, "flavio"],
-    ["2026 · Lula (simulação)", l, "lula"], ["2026 · Flávio (simulação)", f, "flavio"]
-  ].map(([name, votes, color]) => `<div class="comparison-row"><div class="comparison-head"><span>${name}</span><strong>${fmt(votes)}</strong></div><div class="track" aria-hidden="true"><i class="${color}" style="width:${votes / max * 100}%"></i></div></div>`).join("");
   $("rows").innerHTML = rows.map(r => `<tr><th scope="row">${r.name}<small>Base: ${fmt(r.base)} votos</small></th>${cell(r.l, r.lp)}${cell(r.f, r.fp)}${cell(r.rest, r.rp, r.destination)}</tr>`).join("");
   $("totals").innerHTML = `<tr><th scope="row">Total do cenário</th>${cell(l, lp, "dos válidos")}${cell(f, fp, "dos válidos")}<td>${fmt(abs + invalid)}<small>${fmt(abs)} abstenções</small><small>${fmt(invalid)} brancos/nulos</small></td></tr>`;
   const returnText = `Retorno: ${turnout.rate}% de ${fmt(ElectoralModel.first.abs)} ausentes = ${fmt(returned)} eleitores. Distribuição entre quem retorna: ${turnout.l}% Lula, ${turnout.f}% Flávio e ${turnout.i}% brancos/nulos.`;
