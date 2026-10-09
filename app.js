@@ -183,11 +183,8 @@ $("firstTurn").addEventListener("click", () => {
 });
 for (const [id, side] of [["victoryF", "f"], ["victoryL", "l"]]) {
   $(id).addEventListener("click", () => {
-    const alreadyWinning = result[side] > result[side === "l" ? "f" : "l"];
     applyScenario(ElectoralModel.victoryScenario(entries, turnout, side),
-      alreadyWinning
-        ? `${candidates[side].name} já vence neste cenário. Os ajustes foram mantidos.`
-        : `Vitória de ${candidates[side].name} no cenário simulado. Transferências ajustadas em passos de 1 ponto percentual até assumir a liderança; a taxa de retorno dos ausentes foi mantida.`);
+      `Novo cenário de vitória de ${candidates[side].name}. Transferências recalculadas a partir dos ajustes atuais; a taxa de retorno dos ausentes foi mantida.`);
   });
 }
 $("csv").addEventListener("click", () => {

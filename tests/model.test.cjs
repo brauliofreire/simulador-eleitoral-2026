@@ -65,14 +65,17 @@ for (const seed of seeds) {
     assert.equal(generated.turnout.rate, seed.turnout.rate);
     assert.equal(JSON.stringify(seed), before, 'Original scenario must not mutate');
     generated.entries.forEach((e, i) => {
-      assert.ok(e[side] >= seed.entries[i][side]);
       assert.ok(e.l + e.f <= 100);
     });
     const second = model.victoryScenario(generated.entries, generated.turnout, side);
-    assert.equal(JSON.stringify(second), JSON.stringify(generated), 'Already-winning scenario stays unchanged');
+    assert.notEqual(JSON.stringify(generated), before, 'Every click creates a changed scenario');
+    assert.notEqual(JSON.stringify(second), JSON.stringify(generated), 'Repeated victory creates another scenario');
+    const secondResult = model.calculate(second.entries, second.turnout);
+    verify(secondResult);
+    assert.ok(secondResult[side] > secondResult[side === 'l' ? 'f' : 'l']);
   }
 }
 const lulaWin = model.victoryScenario(baseEntries, seeds[0].turnout, 'l');
 const flavioWin = model.victoryScenario(lulaWin.entries, lulaWin.turnout, 'f');
 assert.ok(model.calculate(flavioWin.entries, flavioWin.turnout).f > model.calculate(flavioWin.entries, flavioWin.turnout).l);
-console.log('Cenários rápidos validados: primeiro turno, 28 vitórias, preservação dos ajustes e alternância de vencedor.');
+console.log('Cenários rápidos validados: primeiro turno, 28 vitórias, novos cenários em cliques repetidos e alternância de vencedor.');

@@ -61,9 +61,9 @@ const ElectoralModel = (() => {
       const result = calculate(state.entries, state.turnout);
       return result[side] - result[other];
     };
-    // Keep an existing victory unchanged. Otherwise choose the greatest gain
-    // per whole percentage point, using unallocated votes before the opponent's.
-    while (margin(scenario) <= 0) {
+    // Always change the current scenario, even if the chosen candidate leads.
+    // Choose the greatest gain per whole percentage point.
+    do {
       let best, bestMargin = margin(scenario);
       for (let index = 0; index <= scenario.entries.length; index++) {
         const isTurnout = index === scenario.entries.length;
@@ -82,10 +82,24 @@ const ElectoralModel = (() => {
           best = candidate; bestMargin = candidateMargin;
         }
       }
-      if (!best) throw new Error("Não há votos suficientes para gerar a vitória neste modelo.");
+      if (!best && margin(scenario) > 0) {
+        // At 100% support everywhere, release one point from the smallest
+        // eligible group while retaining a strict victory.
+        for (let index = 0; index < scenario.entries.length; index++) {
+          const group = scenario.entries[index];
+          if (group[side] === 0) continue;
+          const candidate = {
+            entries: scenario.entries.map((e, i) => i === index ? { ...e, [side]: e[side] - 1 } : e),
+            turnout: scenario.turnout
+          };
+          const candidateMargin = margin(candidate);
+          if (candidateMargin > 0 && (!best || candidateMargin > margin(best))) best = candidate;
+        }
+      }
+      if (!best) throw new Error("Não há votos suficientes para gerar um novo cenário de vitória neste modelo.");
       scenario.entries = best.entries;
       scenario.turnout = best.turnout;
-    }
+    } while (margin(scenario) <= 0);
     return scenario;
   }
   return { first, initialEntries, distribute, calculate, firstTurnScenario, victoryScenario };
