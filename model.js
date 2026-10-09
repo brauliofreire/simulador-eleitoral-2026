@@ -53,13 +53,18 @@ const ElectoralModel = (() => {
     };
   }
 
+  function adjustTransfer(group, side, value) {
+    const other = side === "l" ? "f" : "l";
+    const selected = Math.max(2, Math.min(98, Math.round(value)));
+    return { ...group, [side]: selected,
+      [other]: Math.max(2, Math.min(100 - selected, Math.round(group[other]))) };
+  }
+
   function victoryScenario(entries, turnout, side) {
     if (!["l", "f"].includes(side)) throw new Error("Candidato inválido");
-    // Reserve at least 2% for each candidate and for the remaining destination.
+    // Bound candidate transfers; the remaining destination may receive zero.
     function bounded(group) {
-      const l = Math.max(2, Math.min(96, Math.round(group.l)));
-      const f = Math.max(2, Math.min(98 - l, Math.round(group.f)));
-      return { ...group, l, f };
+      return adjustTransfer(group, "l", group.l);
     }
     const boundedTurnout = bounded(turnout);
     const scenario = {
@@ -79,9 +84,9 @@ const ElectoralModel = (() => {
         const isTurnout = index === scenario.entries.length;
         if (isTurnout && scenario.turnout.rate === 0) continue;
         const group = isTurnout ? scenario.turnout : scenario.entries[index];
-        if (group[side] >= 96) continue;
+        if (group[side] >= 98) continue;
         const changed = { ...group, [side]: group[side] + 1 };
-        changed[other] = Math.min(changed[other], 98 - changed[side]);
+        changed[other] = Math.min(changed[other], 100 - changed[side]);
         if (isTurnout) changed.i = 100 - changed.l - changed.f;
         const candidate = {
           entries: scenario.entries.map((e, i) => i === index ? changed : e),
@@ -112,5 +117,5 @@ const ElectoralModel = (() => {
     } while (margin(scenario) <= 0);
     return scenario;
   }
-  return { first, initialEntries, distribute, calculate, firstTurnScenario, victoryScenario };
+  return { first, initialEntries, distribute, calculate, firstTurnScenario, adjustTransfer, victoryScenario };
 })();

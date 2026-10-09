@@ -37,9 +37,10 @@ function buildControls() {
   updateControls();
 }
 
-function updateSlider(input, value, max = 100) {
-  input.value = value;
+function updateSlider(input, value, max = 100, min = 0) {
+  input.min = min;
   input.max = max;
+  input.value = value;
   input.previousElementSibling.querySelector("strong").textContent = `${value}%`;
   input.setAttribute("aria-valuetext", `${value}%`);
 }
@@ -47,13 +48,17 @@ function updateSlider(input, value, max = 100) {
 function updateControls() {
   entries.forEach((e, index) => {
     const group = $(`entry-${index}`);
-    updateSlider($(`entry-${index}-l`), e.l, 100 - e.f);
-    updateSlider($(`entry-${index}-f`), e.f, 100 - e.l);
+    updateSlider($(`entry-${index}-l`), e.l, 98, e.l === 0 ? 0 : 2);
+    updateSlider($(`entry-${index}-f`), e.f, 98, e.f === 0 ? 0 : 2);
     const remaining = 100 - e.l - e.f;
     group.querySelector(".remainder").textContent = `${e.kind === "candidate" ? "Abstenção" : "Permanecem brancos/nulos"}: ${remaining}%`;
     setMini(group, e.l, e.f, remaining);
   });
-  for (const key of ["rate", "l", "f", "i"]) updateSlider($(`turnout-${key}`), turnout[key]);
+  for (const key of ["rate", "l", "f", "i"]) {
+    const candidate = key === "l" || key === "f";
+    updateSlider($(`turnout-${key}`), turnout[key], candidate ? 98 : key === "i" ? Math.max(96, turnout.i) : 100,
+      candidate && turnout[key] !== 0 ? 2 : 0);
+  }
   setMini($("turnoutControls"), turnout.l, turnout.f, turnout.i);
 }
 
@@ -129,13 +134,17 @@ document.addEventListener("input", ev => {
   const el = ev.target;
   if (el.dataset.index !== undefined) {
     const e = entries[Number(el.dataset.index)], side = el.dataset.side;
-    e[side] = Math.min(Number(el.value), 100 - e[side === "l" ? "f" : "l"]);
+    entries[Number(el.dataset.index)] = ElectoralModel.adjustTransfer(e, side, Number(el.value));
   } else if (el.dataset.turnout) {
     const key = el.dataset.turnout, value = Number(el.value);
-    turnout[key] = value;
-    if (key === "l") { turnout.f = Math.min(turnout.f, 100 - value); turnout.i = 100 - value - turnout.f; }
-    else if (key === "f") { turnout.l = Math.min(turnout.l, 100 - value); turnout.i = 100 - value - turnout.l; }
-    else if (key === "i") { turnout.l = Math.min(turnout.l, 100 - value); turnout.f = 100 - value - turnout.l; }
+    if (key === "l" || key === "f") {
+      turnout = ElectoralModel.adjustTransfer(turnout, key, value);
+      turnout.i = 100 - turnout.l - turnout.f;
+    } else if (key === "i") {
+      turnout.i = Math.min(96, value);
+      turnout.l = Math.max(2, Math.min(turnout.l, 98 - turnout.i));
+      turnout.f = 100 - turnout.i - turnout.l;
+    } else turnout.rate = value;
   } else return;
   // Keep the same inputs mounted so dragging and keyboard focus remain uninterrupted.
   updateControls();
@@ -184,7 +193,7 @@ $("firstTurn").addEventListener("click", () => {
 for (const [id, side] of [["victoryF", "f"], ["victoryL", "l"]]) {
   $(id).addEventListener("click", () => {
     applyScenario(ElectoralModel.victoryScenario(entries, turnout, side),
-      `Novo cenário de vitória de ${candidates[side].name}. Transferências recalculadas a partir dos ajustes atuais; retorno dos ausentes em 10% e mínimo de 2% para cada parcela.`);
+      `Novo cenário de vitória de ${candidates[side].name}. Transferências recalculadas a partir dos ajustes atuais; retorno dos ausentes em 10% e transferências para cada candidato entre 2% e 98%.`);
   });
 }
 $("csv").addEventListener("click", () => {

@@ -64,10 +64,10 @@ for (const seed of seeds) {
     assert.ok(result[side] > result[side === 'l' ? 'f' : 'l']);
     assert.equal(generated.turnout.rate, 10);
     assert.equal(result.returned, Math.round(model.first.abs * 0.1));
-    assert.ok([generated.turnout.l, generated.turnout.f, generated.turnout.i].every(p => p >= 2 && p <= 98));
+    assert.ok([generated.turnout.l, generated.turnout.f].every(p => p >= 2 && p <= 98));
     assert.equal(JSON.stringify(seed), before, 'Original scenario must not mutate');
     generated.entries.forEach((e, i) => {
-      assert.ok([e.l, e.f, 100 - e.l - e.f].every(p => p >= 2 && p <= 98));
+      assert.ok([e.l, e.f].every(p => p >= 2 && p <= 98));
     });
     const second = model.victoryScenario(generated.entries, generated.turnout, side);
     assert.notEqual(JSON.stringify(generated), before, 'Every click creates a changed scenario');
@@ -75,8 +75,8 @@ for (const seed of seeds) {
     const secondResult = model.calculate(second.entries, second.turnout);
     verify(secondResult);
     assert.equal(second.turnout.rate, 10);
-    for (const e of second.entries) assert.ok([e.l, e.f, 100 - e.l - e.f].every(p => p >= 2 && p <= 98));
-    assert.ok([second.turnout.l, second.turnout.f, second.turnout.i].every(p => p >= 2 && p <= 98));
+    for (const e of second.entries) assert.ok([e.l, e.f].every(p => p >= 2 && p <= 98));
+    assert.ok([second.turnout.l, second.turnout.f].every(p => p >= 2 && p <= 98));
     assert.ok(secondResult[side] > secondResult[side === 'l' ? 'f' : 'l']);
   }
 }
@@ -84,3 +84,24 @@ const lulaWin = model.victoryScenario(baseEntries, seeds[0].turnout, 'l');
 const flavioWin = model.victoryScenario(lulaWin.entries, lulaWin.turnout, 'f');
 assert.ok(model.calculate(flavioWin.entries, flavioWin.turnout).f > model.calculate(flavioWin.entries, flavioWin.turnout).l);
 console.log('Cenários rápidos validados: primeiro turno, 28 vitórias, novos cenários em cliques repetidos e alternância de vencedor.');
+
+for (const side of ['l', 'f']) {
+  const other = side === 'l' ? 'f' : 'l';
+  for (const value of [-10, 0, 1, 2, 50, 98, 99, 100, 110]) {
+    const group = { l: 50, f: 50 };
+    const adjusted = model.adjustTransfer(group, side, value);
+    assert.equal(adjusted[side], Math.max(2, Math.min(98, value)));
+    assert.ok(adjusted[other] >= 2 && adjusted[other] <= 98);
+    assert.ok(adjusted.l + adjusted.f <= 100);
+    assert.equal(group.l, 50);
+    assert.equal(group.f, 50);
+  }
+  const ceiling = model.adjustTransfer({ l: 50, f: 50 }, side, 100);
+  assert.equal(ceiling[side], 98);
+  assert.equal(ceiling[other], 2);
+  verify(model.calculate(baseEntries.map(e => ({ ...e, ...ceiling })), { rate: 10, ...ceiling, i: 0 }));
+  const fromZero = model.adjustTransfer({ l: 0, f: 0 }, side, 0);
+  assert.equal(fromZero.l, 2);
+  assert.equal(fromZero.f, 2);
+}
+console.log('Ajustes manuais validados: limites de 2% e 98%, soma máxima de 100% e restante permitido em 0%.');
