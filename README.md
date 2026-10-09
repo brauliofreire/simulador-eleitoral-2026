@@ -8,6 +8,8 @@ Abra `index.html` em um navegador. O projeto não necessita de backend ou depend
 ## Dados e limites
 Os números iniciais foram adotados na conversa de concepção e ainda **não foram verificados em fonte oficial**. Conferir antes de qualquer publicação. O simulador não é pesquisa eleitoral nem previsão.
 
+A aba de fontes registra a categoria **Demais candidatos**, informada pelo usuário: 260.655 votos, detalhados em seis candidaturas, e um total informado de 119.300.788 votos válidos. Esses números não possuem link de origem registrado e não participam dos cálculos de transferência.
+
 ## Privacidade e publicação
 Sem coleta de dados pessoais. Repositório público e publicação no GitHub Pages autorizados pelo proprietário em 08/10/2026.
 
