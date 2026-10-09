@@ -25,7 +25,7 @@ const context = vm.createContext({ document, console, setTimeout });
 vm.runInContext(fs.readFileSync('model.js', 'utf8'), context);
 vm.runInContext(fs.readFileSync('app.js', 'utf8').replace(/reset\(\);\s*$/, ''), context);
 vm.runInContext('entries = ElectoralModel.initialEntries(); turnout = {rate: 0, l: 50, f: 50, i: 0}; calculate = () => {};', context);
-const ids = Array.from({ length: 6 }, (_, i) => [`entry-${i}-l`, `entry-${i}-f`]).flat()
+const ids = Array.from({ length: 6 }, (_, i) => [`entry-${i}-l`, `entry-${i}-f`, ...(i < 4 ? [`entry-${i}-r`] : [])]).flat()
   .concat(['turnout-rate', 'turnout-l', 'turnout-f', 'turnout-i']);
 const emit = (type, target, props = {}) => {
   for (const callback of listeners.get(type) || []) callback({ target, ...props });
@@ -51,6 +51,13 @@ for (const id of ids) {
   field.select = () => { field.selected = true; };
 }
 vm.runInContext('updateControls();', context);
+vm.runInContext('buildControls();', context);
+const candidateMarkup = nodes.get('candidateControls').innerHTML;
+for (let i = 0; i < 4; i++) {
+  assert.ok(candidateMarkup.includes(`id="entry-${i}-r" type="range"`), `Candidate ${i}: abstention slider is rendered`);
+  assert.ok(candidateMarkup.includes(`id="entry-${i}-r-value" type="number"`), `Candidate ${i}: abstention percentage is editable`);
+}
+assert.ok(!nodes.get('invalidControls').innerHTML.includes('data-side="r"'), 'Invalid votes do not acquire abstention controls');
 for (const id of ids) {
   const range = nodes.get(id), field = nodes.get(`${id}-value`);
   let captured = false;
@@ -88,7 +95,7 @@ for (const id of ids) {
   for (const value of [0, 0.1, 1.5, 99, 99.9, 100]) {
     field.value = String(value);
     emit('change', field);
-    assert.equal(Number(range.value), value, `${id}: unrestricted percentage ${value}`);
+    assert.ok(Math.abs(Number(range.value) - value) < 1e-10, `${id}: unrestricted percentage ${value}`);
   }
   field.value = '999';
   emit('change', field);

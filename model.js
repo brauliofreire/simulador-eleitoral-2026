@@ -54,8 +54,12 @@ const ElectoralModel = (() => {
   }
 
   function adjustTransfer(group, side, value) {
-    const other = side === "l" ? "f" : "l";
     const selected = Math.max(0, Math.min(100, value));
+    if (side === "r") {
+      const l = Math.min(group.l, 100 - selected);
+      return { ...group, l, f: 100 - selected - l };
+    }
+    const other = side === "l" ? "f" : "l";
     return { ...group, [side]: selected,
       [other]: Math.max(0, Math.min(100 - selected, group[other])) };
   }

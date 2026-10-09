@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#101827">
   <title>Simulador Eleitoral 2026</title>
   <link rel="stylesheet" href="styles.css?v=13">
-  <script src="model.js?v=5" defer></script>
-  <script src="app.js?v=13" defer></script>
+  <script src="model.js?v=6" defer></script>
+  <script src="app.js?v=14" defer></script>
 </head>
 <body>
 <main class="wrap">
@@ -63,7 +63,7 @@
     </div>
   </section>
   <section id="transfers" class="tabcontent" role="tabpanel" aria-labelledby="tab-transfers" tabindex="0" hidden>
-    <div class="card"><h2>Transferências de outros candidatos</h2><p>Distribua os votos entre Lula e Flávio. A parcela restante será contabilizada como abstenção.</p><div id="candidateControls"></div></div>
+    <div class="card"><h2>Transferências de outros candidatos</h2><p>Distribua os votos entre Lula, Flávio e abstenção. Ao ajustar a abstenção, o percentual de Lula é mantido quando possível e o de Flávio completa os 100%.</p><div id="candidateControls"></div></div>
   </section>
   <section id="turnout" class="tabcontent" role="tabpanel" aria-labelledby="tab-turnout" tabindex="0" hidden>
     <div class="card"><h2 data-vote-icons="ausentes">Retorno de quem se absteve</h2><p>Base: 33.469.244 ausentes na entrada do primeiro turno. Ajuste quantos retornam e como os votos desses eleitores se distribuem.</p><div id="turnoutControls"></div><p class="footnote">O retorno incide somente sobre os ausentes originais, sem incluir abstenções geradas pelas transferências.</p></div>

@@ -64,6 +64,7 @@ function buildControls() {
       `<div class="candidate" id="entry-${index}" role="group" aria-label="Transferência de ${e.name}">
         <div class="candidate-head"><strong>${originName(e.name)}</strong><small>${fmt(e.votes)} votos</small></div>
         <div class="sliders">${slider(`entry-${index}-l`, "Lula", e.l, 100 - e.f, `data-index="${index}" data-side="l"`)}${slider(`entry-${index}-f`, "Flávio", e.f, 100 - e.l, `data-index="${index}" data-side="f"`)}</div>
+        ${e.kind === "candidate" ? slider(`entry-${index}-r`, "Abstenção", 100 - e.l - e.f, 100, `data-index="${index}" data-side="r"`) : ""}
         <div class="remainder"></div><div class="mini" aria-hidden="true"><i class="l"></i><i class="f"></i><i class="r"></i></div>
       </div>`).join("");
   }
@@ -92,6 +93,7 @@ function updateControls() {
     updateSlider($(`entry-${index}-l`), e.l);
     updateSlider($(`entry-${index}-f`), e.f);
     const remaining = 100 - e.l - e.f;
+    if (e.kind === "candidate") updateSlider($(`entry-${index}-r`), remaining);
     group.querySelector(".remainder").innerHTML = `${originName(e.kind === "candidate" ? "Abstenção" : "Permanecem brancos/nulos")}: ${remaining}%`;
     setMini(group, e.l, e.f, remaining);
   });

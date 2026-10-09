@@ -105,3 +105,20 @@ for (const side of ['l', 'f']) {
   assert.equal(fromZero.f, 0);
 }
 console.log('Ajustes manuais validados: percentuais de 0% a 100%, incluindo decimais, soma máxima de 100% e restante permitido em 0%.');
+
+for (const group of [{ l: 20, f: 50 }, { l: 0, f: 0 }, { l: 100, f: 0 }, { l: 33.3, f: 66.7 }]) {
+  for (const value of [-10, 0, 0.1, 37, 99.9, 100, 110]) {
+    const selected = Math.max(0, Math.min(100, value));
+    const adjusted = model.adjustTransfer(group, 'r', value);
+    assert.ok(Math.abs(100 - adjusted.l - adjusted.f - selected) < 1e-10);
+    assert.equal(adjusted.l, Math.min(group.l, 100 - selected));
+    assert.ok(adjusted.l >= 0 && adjusted.f >= 0);
+    const entries = baseEntries.map(e => model.adjustTransfer(e, 'r', value));
+    const result = model.calculate(entries, { rate: 0, l: 50, f: 50, i: 0 });
+    assert.equal(result.l + result.f + result.abs + result.invalid, total);
+    const abstentions = result.rows.slice(2, 6).reduce((sum, row) => sum + row.rest, 0);
+    assert.equal(result.abs, model.first.abs + abstentions);
+    if (selected === 100) assert.equal(result.l + result.f, model.first.l + model.first.f);
+  }
+}
+console.log('Abstenção ajustável validada: limites, decimais, redistribuição e conservação dos votos.');
