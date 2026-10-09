@@ -62,16 +62,21 @@ for (const seed of seeds) {
     const result = model.calculate(generated.entries, generated.turnout);
     verify(result);
     assert.ok(result[side] > result[side === 'l' ? 'f' : 'l']);
-    assert.equal(generated.turnout.rate, seed.turnout.rate);
+    assert.equal(generated.turnout.rate, 10);
+    assert.equal(result.returned, Math.round(model.first.abs * 0.1));
+    assert.ok([generated.turnout.l, generated.turnout.f, generated.turnout.i].every(p => p >= 2 && p <= 98));
     assert.equal(JSON.stringify(seed), before, 'Original scenario must not mutate');
     generated.entries.forEach((e, i) => {
-      assert.ok(e.l + e.f <= 100);
+      assert.ok([e.l, e.f, 100 - e.l - e.f].every(p => p >= 2 && p <= 98));
     });
     const second = model.victoryScenario(generated.entries, generated.turnout, side);
     assert.notEqual(JSON.stringify(generated), before, 'Every click creates a changed scenario');
     assert.notEqual(JSON.stringify(second), JSON.stringify(generated), 'Repeated victory creates another scenario');
     const secondResult = model.calculate(second.entries, second.turnout);
     verify(secondResult);
+    assert.equal(second.turnout.rate, 10);
+    for (const e of second.entries) assert.ok([e.l, e.f, 100 - e.l - e.f].every(p => p >= 2 && p <= 98));
+    assert.ok([second.turnout.l, second.turnout.f, second.turnout.i].every(p => p >= 2 && p <= 98));
     assert.ok(secondResult[side] > secondResult[side === 'l' ? 'f' : 'l']);
   }
 }

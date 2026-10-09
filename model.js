@@ -55,7 +55,17 @@ const ElectoralModel = (() => {
 
   function victoryScenario(entries, turnout, side) {
     if (!["l", "f"].includes(side)) throw new Error("Candidato inválido");
-    const scenario = { entries: entries.map(e => ({ ...e })), turnout: { ...turnout } };
+    // Reserve at least 2% for each candidate and for the remaining destination.
+    function bounded(group) {
+      const l = Math.max(2, Math.min(96, Math.round(group.l)));
+      const f = Math.max(2, Math.min(98 - l, Math.round(group.f)));
+      return { ...group, l, f };
+    }
+    const boundedTurnout = bounded(turnout);
+    const scenario = {
+      entries: entries.map(bounded),
+      turnout: { ...boundedTurnout, rate: 10, i: 100 - boundedTurnout.l - boundedTurnout.f }
+    };
     const other = side === "l" ? "f" : "l";
     const margin = state => {
       const result = calculate(state.entries, state.turnout);
@@ -69,9 +79,9 @@ const ElectoralModel = (() => {
         const isTurnout = index === scenario.entries.length;
         if (isTurnout && scenario.turnout.rate === 0) continue;
         const group = isTurnout ? scenario.turnout : scenario.entries[index];
-        if (group[side] >= 100) continue;
+        if (group[side] >= 96) continue;
         const changed = { ...group, [side]: group[side] + 1 };
-        changed[other] = Math.min(changed[other], 100 - changed[side]);
+        changed[other] = Math.min(changed[other], 98 - changed[side]);
         if (isTurnout) changed.i = 100 - changed.l - changed.f;
         const candidate = {
           entries: scenario.entries.map((e, i) => i === index ? changed : e),
@@ -83,11 +93,11 @@ const ElectoralModel = (() => {
         }
       }
       if (!best && margin(scenario) > 0) {
-        // At 100% support everywhere, release one point from the smallest
+        // At the support ceiling everywhere, release one point from the smallest
         // eligible group while retaining a strict victory.
         for (let index = 0; index < scenario.entries.length; index++) {
           const group = scenario.entries[index];
-          if (group[side] === 0) continue;
+          if (group[side] <= 2) continue;
           const candidate = {
             entries: scenario.entries.map((e, i) => i === index ? { ...e, [side]: e[side] - 1 } : e),
             turnout: scenario.turnout

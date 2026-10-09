@@ -184,7 +184,7 @@ $("firstTurn").addEventListener("click", () => {
 for (const [id, side] of [["victoryF", "f"], ["victoryL", "l"]]) {
   $(id).addEventListener("click", () => {
     applyScenario(ElectoralModel.victoryScenario(entries, turnout, side),
-      `Novo cenário de vitória de ${candidates[side].name}. Transferências recalculadas a partir dos ajustes atuais; a taxa de retorno dos ausentes foi mantida.`);
+      `Novo cenário de vitória de ${candidates[side].name}. Transferências recalculadas a partir dos ajustes atuais; retorno dos ausentes em 10% e mínimo de 2% para cada parcela.`);
   });
 }
 $("csv").addEventListener("click", () => {
