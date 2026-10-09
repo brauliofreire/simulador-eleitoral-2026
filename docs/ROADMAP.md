@@ -2,7 +2,8 @@
 
 > **Versão:** 1.0 — 08/10/2026  
 > **Status:** planejamento inicial, sujeito a revisão após os primeiros testes.  
-> **Repositório:** privado (`brauliofreire/simulador-eleitoral-2026`).  
+> **Repositório:** público (`brauliofreire/simulador-eleitoral-2026`), por autorização do proprietário em 08/10/2026.
+> **Publicação antecipada autorizada:** GitHub Pages habilitado para visualização externa. A validação dos dados de 2026, testes em dispositivos reais e PWA continuam pendentes; esta publicação não representa homologação de todas as fases.
 > **Princípio:** simulação de cenários hipotéticos, **não** pesquisa eleitoral, previsão ou recomendação de voto.
 
 ## 1. Objetivo do produto
@@ -16,7 +17,7 @@ Disponibilizar um simulador eleitoral transparente, intuitivo e responsivo para 
 - **Transparência:** premissas, fontes, metodologia e limites visíveis.
 - **Baixa complexidade:** manter HTML/CSS/JavaScript puro enquanto atender ao produto.
 - **Evolução incremental:** cada fase deve ser testada e aprovada antes da próxima.
-- **Sem publicação automática:** manter repositório privado e não ativar hospedagem pública sem aprovação explícita.
+- **Publicação autorizada:** GitHub Pages usa a branch `main`; novos pushes atualizam o site. Mudanças adicionais de hospedagem ou visibilidade exigem autorização explícita.
 
 ## 2. Visão consolidada
 
@@ -28,7 +29,7 @@ Disponibilizar um simulador eleitoral transparente, intuitivo e responsivo para 
 | 3 | PWA e instalação | P1 | Fase 2 | Pendente |
 | 4 | Persistência e compartilhamento | P1 | Fase 3 (recomendado) | Pendente |
 | 5 | Transparência dos dados e documentação pública | P0 para publicação | Fases 1–4 | Pendente |
-| 6 | Publicação controlada | P1 | Fase 5 + aprovação | Bloqueada por aprovação |
+| 6 | Publicação controlada | P1 | Fase 5 + aprovação | Pages autorizado antecipadamente; homologação completa pendente |
 | 7 | Evoluções opcionais | P2 | Fase 6 | Backlog |
 
 **P0:** essencial para confiabilidade ou publicação; **P1:** funcionalidade prioritária; **P2:** melhoria opcional.
@@ -50,7 +51,7 @@ Não há estimativas de prazo fechadas neste documento. Os marcos dependem dos r
 - [x] Comparação visual com dados de 2022.
 - [x] Tabela de memória de cálculo.
 - [x] Exportação de CSV e cópia de resumo.
-- [x] Repositório privado e documentação arquitetural.
+- [x] Repositório e documentação arquitetural (repositório inicialmente privado; abertura posterior autorizada).
 
 ### Pendências conhecidas
 

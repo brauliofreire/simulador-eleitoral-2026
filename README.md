@@ -9,7 +9,9 @@ Abra `index.html` em um navegador. O projeto não necessita de backend ou depend
 Os números iniciais foram adotados na conversa de concepção e ainda **não foram verificados em fonte oficial**. Conferir antes de qualquer publicação. O simulador não é pesquisa eleitoral nem previsão.
 
 ## Privacidade e publicação
-Sem coleta de dados pessoais. Repositório privado e GitHub Pages não ativado nesta fase. Publicar somente após aprovação explícita.
+Sem coleta de dados pessoais. Repositório público e publicação no GitHub Pages autorizados pelo proprietário em 08/10/2026.
+
+Acesse: [https://brauliofreire.github.io/simulador-eleitoral-2026/](https://brauliofreire.github.io/simulador-eleitoral-2026/). A publicação usa a raiz da branch `main`, com HTTPS; novos pushes nessa branch atualizam o site. Os dados de entrada de 2026 continuam pendentes de conferência oficial.
 
 ## Interface e validação local
 O resultado simulado do **2º turno** permanece acima das seis abas. A visão geral mostra a composição de votos por candidato; abstenções, nulos e brancos compartilham uma aba. A comparação histórica e as fontes têm abas próprias. O eleito é identificado **somente no cenário simulado**, com foto local, ou como empate.

@@ -1,6 +1,6 @@
 # Arquitetura — Simulador Eleitoral 2026
 
-> **Status:** versão inicial (site estático), em repositório privado.  
+> **Status:** versão inicial (site estático), em repositório público com GitHub Pages autorizado em 08/10/2026.
 > **Objetivo:** documentar a arquitetura efetivamente implementada e a evolução planejada.  
 > **Importante:** o simulador trabalha com hipóteses configuráveis; **não** é pesquisa eleitoral ou previsão.
 
@@ -153,7 +153,7 @@ cd simulador-eleitoral-2026
 python3 -m http.server 8000
 ```
 
-Abra `http://localhost:8000` no navegador. O clone de repositório privado exige autenticação no GitHub.
+Abra `http://localhost:8000` no navegador. O repositório é público e pode ser clonado sem autenticação.
 
 ### GitHub Codespaces
 
@@ -180,9 +180,9 @@ Na aba **Ports**, abra a porta 8000 no navegador. **Mantenha a porta privada** p
 
 ## 8. Implantação e segurança
 
-**Situação atual:** o código está em repositório **privado** e o site **não foi publicado**.
+**Situação atual:** repositório **público**, com publicação autorizada no GitHub Pages em [https://brauliofreire.github.io/simulador-eleitoral-2026/](https://brauliofreire.github.io/simulador-eleitoral-2026/). A origem é `main` / raiz, com HTTPS obrigatório.
 
-Para publicação futura, a aplicação pode ser hospedada em serviços de arquivos estáticos (como GitHub Pages), após validação dos dados e aprovação do proprietário.
+Novos pushes na branch `main` acionam a atualização do site. Para reverter uma versão, reverta o commit correspondente e envie a reversão. Para retirar o site do ar, use Settings → Pages → Unpublish site no GitHub. Os dados iniciais de 2026 continuam pendentes de validação.
 
 **Atenção:** não confundir visibilidade do repositório com visibilidade do site publicado. Dependendo da plataforma e do plano, a hospedagem pode ser pública mesmo quando o código-fonte está privado. Verificar as configurações antes de habilitar qualquer publicação.
 
@@ -226,4 +226,4 @@ Também são propostas futuras:
 
 ---
 
-**Próximo marco recomendado:** validar a implementação atual e os dados de entrada, corrigir eventuais inconsistências e, depois, implementar a PWA em uma etapa separada, mantendo o repositório privado até autorização de publicação.
+**Próximo marco recomendado:** validar a implementação atual e os dados de entrada, corrigir eventuais inconsistências e, depois, implementar a PWA em uma etapa separada, mantendo explícita a pendência de validação dos dados mesmo após a publicação autorizada.
